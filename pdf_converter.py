@@ -1,6 +1,6 @@
 import os
 from fpdf import FPDF
-
+from PIL import Image
 
 class PDF(FPDF):
     current_x = 10
@@ -50,14 +50,17 @@ class PDF(FPDF):
         self.point_return()
         self.add_y(max(15, (len(concern) + 20) // 45 * 15))
 
+
+
     def add_block(self, ascii_card, card_name, comment):
         if self.current_y >= 170:
             self.add_page()
             self.current_y = 30
-        art = "\n".join(line.strip() for line in ascii_card.split("\n"))
+
         self.point_return()
-        self.set_font("JetBrainsMono", "", 12)
-        self.multi_cell(0, 5, art)
+        self.multi_cell(0, 5)  
+        self.image(ascii_card, x=self.current_x, y=self.current_y, w=60)
+
         self.point_return()
         self.add_y(5)
         self.add_x(70)

@@ -34,8 +34,9 @@ class EmailSender:
 
         with smtplib.SMTP(self.smtp_server, self.port) as server:
             server.starttls()
+            server.ehlo()
             server.login(self.sender_email, self.password)
             text = message.as_string()
             server.sendmail(self.sender_email, receiver_email, text)
 
-        print("Debug: Email sent successfully!")
+        # print("Debug: Email sent successfully!")

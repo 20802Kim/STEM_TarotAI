@@ -1,3 +1,8 @@
+from tkinter import *
+from tkinter import messagebox, font
+from PIL import Image, ImageTk
+import time
+
 ## Importing Libraries
 import random
 import time
@@ -9,705 +14,694 @@ from tarot_reader import TarotReader
 
 warnings.filterwarnings("ignore")
 
-def input_exit(message):
-    user_input = input(message)
-    if user_input == "brains":
-        sys.exit()
-    return user_input
-
-# clear screen function
-def clear_screen():
-    os.system("cls" if os.name == "nt" else "clear")
-
-
-## slow_type for string output
-def slow_type(text, delay=0.1):
-    for char in text:
-        sys.stdout.write(char)
-        sys.stdout.flush()
-        time.sleep(delay)
-    print()
-
-
 ## Importing Classes
-from opening import OpeningMessage
+# from opening import OpeningMessage
 from PandasToList import PandasToList
 from cards import cards
 from pdf_converter import PDF
-from emailsender import EmailSender
+# from emailsender import EmailSender
 from secret import sender_email, password  # .gitIgnore에 추가됨.
+# from send_kakao import Send_kakao
+# from google_drive_api import Google_Drive_Api
 
-email_sender = EmailSender(sender_email, password)
+from pathlib import Path
 
-while True:
+OUTPUT_PATH = Path(__file__).parent
+ASSETS_PATH = OUTPUT_PATH/'assets/frame0'
 
-    ## Language Setting
+def relative_to_assets(path: str) -> Path:
+    return ASSETS_PATH / Path(path)
 
-    clear_screen()
-    lang = print("Language:  \n\n1. English  \n2. 한국어  \n")
+# email_sender = EmailSender(sender_email, password)
+# send_message=Send_kakao()
 
+reader=TarotReader()
 
-    def get_valid_input_lang(prompt):
-        while True:
-            try:
-                value = int(input_exit(prompt))
-                if value == 1 or value == 2:
-                    return value
-                else:
-                    print(f"\nTry Again.")
-            except ValueError:
-                print("\nTry again.")
+## Tarot Card import
+p = PandasToList()
+list_up_tarot = p.up_deck("TarotCardsUpright.csv")
+list_rev_tarot = p.rev_deck("TarotCardsReversed.csv")
 
-
-    lang = get_valid_input_lang("Choose your Language (1, 2):  ")
-
-    if lang == 1:
-        delay_num = 0.01
-    else:
-        delay_num = 0.01  # 텍스트 딜레이 (0에 가까울수록 빨라짐)
-
-    # if lang = 1 -> English
-    # if lang = 2 -> Korean
+# big_font=font.Font(family='SCDream2.otf',size=50)
+big_font=('SCDream2.otf',50)
+normal_font=('S_Core_Dream\\SCDream2.otf',10)
 
 
-    def print_lang(eng, kor):
-        if lang == 1:
-            print(eng)
-        else:
-            print(kor)
+class BeforeStartApp():
+    def __init__(self,root):
+        self.root=root
+
+        self.root.configure(bg = "#FFFFFF")
 
 
-    ## Before the Execution (String file)
-    clear_screen()
-    print_lang("Before we start...  \n", "시작하기 전에...  \n")
-    m = OpeningMessage()
-    if lang == 1:
-        m.__init__(filename="BeforetheExecution_Eng.txt")
-    else:
-        m.__init__(filename="BeforetheExecution.txt")
-    print(m.open_file())
-    m.open_file()
-    if lang == 1:
-        open_after = input_exit("Press Enter to continue.  \n")
-    else:
-        open_after = input_exit("계속하려면 Enter 키를 누르세요.  \n")
-    open_after
-    clear_screen()
+        self.canvas = Canvas(
+            self.root,
+            bg = "#FFFFFF",
+            height = 900,
+            width = 1440,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
+        )
+        self.canvas.place(x=0,y=0)
+        self.canvas.create_rectangle(
+            0.0,
+            0.0,
+            1440.0,
+            608.0,
+            fill="#001C54",
+            outline=""
+        )
 
+        self.button_image_1 = ImageTk.PhotoImage(
+            Image.open("assets\\frame0\\button_1.png")
+        )
 
-    ## Tarot Card import
-    p = PandasToList()
-    list_up_tarot = p.up_deck("TarotCardsUpright.csv")
-    list_rev_tarot = p.rev_deck("TarotCardsReversed.csv")
+        self.startButton=Button(
+            self.canvas,
+            image=self.button_image_1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.goToClassicTarotApp,
+            relief='flat'
+        )
+        self.startButton.place(
+            x=438.9999999999999,
+            y=685.0,
+            width=562.0,
+            height=142.0
+        )
+        self.canvas.create_text(
+            392.9999999999999,
+            241.00000000000006,
+            anchor="nw",
+            text="TAROT AI",
+            fill="#41C1C3",
+            font=("Arial Black", 128 * -1)
+        )
+        self.canvas.create_text(
+            520,
+            220,
+            anchor="nw",
+            text="2 0 2 4  S T E M  C A M P",
+            fill="#41C1C3",
+            font=("Arial Black", 32 * -1)
+        )
+    def goToClassicTarotApp(self):
+        self.canvas.destroy()
+        classicTarotApp=ClassicTarotApp(self.root)
 
+class ClassicTarotApp():
+    def __init__(self,root):
+        self.root=root
 
-    ## Starting Message
-    print(
-    """
-=====================================================================
-
- _______  _______  ______    _______  _______  _______  ___  
-|       ||   _   ||    _ |  |       ||       ||   _   ||   | 
-|_     _||  |_|  ||   | ||  |   _   ||_     _||  |_|  ||   | 
-  |   |  |       ||   |_||_ |  | |  |  |   |  |       ||   | 
-  |   |  |       ||    __  ||  |_|  |  |   |  |       ||   | 
-  |   |  |   _   ||   |  | ||       |  |   |  |   _   ||   | 
-  |___|  |__| |__||___|  |_||_______|  |___|  |__| |__||___| 
-
-
-=====================================================================
-"""
-)
-    if lang == 1:
-        slow_type(
-        """
-Hey there! I'm TarotAI, an AI that can show you a glimpse of your future.
-
-I know school life can be tough, so thanks for taking the time to come and get a reading.
-
-Before we start, tell me your name. It can be a nickname, no need for your real name.
-""",
-        delay_num,
-    )
-    else:
-        slow_type(
-        """
-
-안녕? 나는 오늘 너에게 잠깐이나마 미래를 보여줄 인공지능 TarotAI야.
-
-학교생활 많이 힘들지? 이렇게 시간 내서 점 보러 와줘서 고마워. 
-
-시작하기 전에, 네 이름을 알려줘. 진짜 이름 말고, 가명으로 적어도 돼.
-
-""",
-        delay_num,
-    )
-    if lang == 1:
-        name = input_exit("Write your name (nickname):  ")
-    else:
-        name = input_exit("이름(가명)을 적어줘:  ")
-
-## Concern
-    clear_screen()
-    print("================================================================")
-    if lang == 1:
-        slow_type(f"\nNice to meet you, {name}!  I'm glad you're here!", delay_num)
-        slow_type(
-        """
-Now, tell me your concern.
-
-You can ask me about your fortune for a specific period, like 'How's my luck today?' or
-
-you can write about a specific problem, like 'I'm not studying well these days' or 'Can I date someone?'.
-""",
-        delay_num,
-    )
-    else:
-        slow_type(f"\n네 이름은 {name}이구나.  반가워!", delay_num)
-        slow_type(
-        """
-그럼 이제, 네 고민을 알려줘.
-
-'오늘 내 운세는 어때' 같이 특정 기간의 운세를 봐줄 수도 있고,
-
-'요즘 공부가 잘 안 돼' 라던가 '내가 연애를 할 수 있을까' 처럼
-특정 고민을 적어줘도 좋아.
-""",
-        delay_num,
-    )
-
-    reader = TarotReader()
-
-    if lang == 1:
-        reader.korean = False
-    else:
-        reader.korean = True
-
-
-    if lang == 1:
-        concern = input_exit("What's your concern?  \n\nConcern:  ")
-        while True:
-            concern_true = input_exit(f"\n\n{concern}\n\nIs this your concern? (Y / n): ")
-            if concern_true in ["Y", "y"]:
-                break
-            elif concern_true == "n":
-                print("\n")
-                concern = input_exit("What is your concern? ")
-    else:
-        concern = input_exit("너의 고민은 뭐니? \n\n고민:  ")
-        while True:
-            concern_true = input_exit(f"\n\n{concern}\n\n이 고민이 맞니? (Y / n): ")
-            if concern_true in ["Y", "y"]:
-                break
-            elif concern_true == "n":
-                print("\n")
-                concern = input_exit("너의 고민은 뭐니?  ")
+        self.canvas = Canvas(
+            self.root,
+            bg = "#FFFFFF",
+            height = 900,
+            width = 1440,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
+        )
+        self.canvas.place(x=0,y=0)
         
-    reader.set_concern(concern)
+        self.canvas.create_text(
+            392.9999999999999,
+            241.00000000000006,
+            anchor="nw",
+            text="타로점 보기",
+            fill="#41C1C3",
+            font=("Arial Black", 128 * -1)
+        )
 
-    ## Card Selection - Info
-    reader.set_cards_num()
-    card_num = reader.cards_num
-    # AI가 card_num을 정한다 ->  1  or 3
-    card_num_desc = "\n\n".join(reader.cards_num_meaning)
-    # AI가 n번째 카드가 뜻하는 것을 적는다 (과거-현재-미래)
-    #  concern을 중점으로...
+        self.canvas.create_text(
+            228.9999999999999,
+            49.00000000000006,
+            anchor="nw",
+            text="안녕? 나는 오늘 너에게 잠깐이나마 미래를 보여줄 인공지능 Tarot AI야.",
+            fill="#41C1C3",
+            font=("Arial", 32 * -1)
+        )
 
-    clear_screen()
-    print("===============================================================")
-    if lang == 1:
-        slow_type(
-        f"""
-Great! Now, let's pick some cards, shall we?
-I'm going to draw a total of {card_num} cards from now on.
+        self.canvas.create_text(
+            287.9999999999999,
+            88.00000000000006,
+            anchor="nw",
+            text="학교생활 많이 힘들지? 이렇게 시간 내서 점 보러 와줘서 고마워.",
+            fill="#41C1C3",
+            font=("Arial", 32 * -1)
+        )
 
-{card_num_desc}
+        self.canvas.create_text(
+            197.9999999999999,
+            127.00000000000006,
+            anchor="nw",
+            text="시작하기 전에, 네 이름과 MBTI를 알려줘. 진짜 이름 말고, 가명으로 적어도 돼.",
+            fill="#41C1C3",
+            font=("Arial", 32 * -1)
+        )
 
-Got it? If you don't understand, I'll explain it to you again when interpreting the cards.
-""",
-        delay_num,
-    )
-    else:
-        slow_type(
-        f"""
-좋아,  그럼 이제 카드를 뽑아볼까? 
-지금부터 총 {card_num}개의 카드를 뽑을거야.
+        self.entry_image_1 = ImageTk.PhotoImage(
+            Image.open("assets\\entry_1.png")
+        )
+        self.nameEntryImage = self.canvas.create_image(
+            719.9999999999999,
+            484.00000000000006,
+            image=self.entry_image_1
+        )
+        self.nameEntry=Entry(self.canvas, bd=0,bg="#E7E7E7",fg="#000716",highlightthickness=0,font=("Arial", 40 * -1))
+        self.nameEntry.place(x=121.99999999999989,y=450.00000000000006,width=1196.0,height=66.0)
+        self.mbtiEntryImage = self.canvas.create_image(
+            719.9999999999999,
+            564.00000000000006,
+            image=self.entry_image_1
+        )
+        self.mbtiEntry=Entry(self.canvas, bd=0,bg="#E7E7E7",fg="#000716",highlightthickness=0,font=("Arial", 40 * -1))
+        self.mbtiEntry.place(x=121.99999999999989,y=530.00000000000006,width=1196.0,height=66.0)
 
-{card_num_desc}
+        self.button_image_1 = ImageTk.PhotoImage(
+            Image.open("assets\\button_1.png")
+        )
 
-이해했어?  잘 모르겠으면 카드를 해석할 때  다시 알려줄게.
-
-""",
-        delay_num,
-    )
-
-    if lang == 1:
-        next = input_exit("Press Enter to continue.  \n")
-    else:
-        next = input_exit("계속하려면 Enter를 누르세요.\n")
-
-    ## Card Selection
-
-    list_tarot_deck = list_up_tarot + list_rev_tarot
-    list_tarot_deck_mixed = list_tarot_deck[:]
-    random.shuffle(list_tarot_deck_mixed)
-
-    clear_screen()
-    print("===================================================================")
-    if lang == 1:
-        slow_type(
-        """
-Alright,  let's draw the cards now.
-
-Since I'm an AI, I can't show you how I shuffle the cards,
-so tell me the number of the card you want to draw.
-
-Calm your mind and write down the number of the card you want to draw from the top.
+        self.nameConfirmButton=Button(
+            self.canvas,
+            image=self.button_image_1,
+            borderwidth=0,
+            highlightthickness=0,
+            relief="flat",
+            command=self.proceed1
+        )
+        self.nameConfirmButton.place(
+            x=500.9999999999999,
+            y=682.0,
+            width=437.0,
+            height=110.41636657714844
+        )
+        self.canvas.create_rectangle(
+            0,
+            209.00000000000006,
+            1504.0,
+            218.00000000000006,
+            fill="#41C1C3",
+            outline=""
+        )
     
-""",
-        delay_num,
-    )
-    else:
-        slow_type(
-        """
+    def proceed1(self):
+        global name
+        name=self.nameEntry.get().replace('\n','')
+        self.mbti=self.mbtiEntry.get().replace('\n','')
+        if self.mbti!='':
+            
+            self.canvas.destroy()
+            self.canvas=Canvas(
+                self.root,
+                bg = "#FFFFFF",
+                height = 900,
+                width = 1440,
+                bd = 0,
+                highlightthickness = 0,
+                relief = "ridge"
+            )
+            self.canvas.place(x=0,y=0)
 
-좋아,  그럼 이제 카드를 뽑아볼까?
+            self.canvas.create_text(
+                378.9999999999999,
+                49.00000000000006,
+                anchor="nw",
+                text=f'네 이름은 {name}이구나. mbti는 {self.mbti}네,  반가워!',
+                fill="#41C1C3",
+                font=("Arial", 32 * -1)
+            )
 
-나는 AI라 카드를 섞는걸 보여주기 힘드니까,
-숫자로 너가 뽑고싶은 카드를 알려줘.
+            self.canvas.create_text(
+                307.9999999999999,
+                88.00000000000006,
+                anchor="nw",
+                text="'오늘 내 운세는 어때' 같이 특정 기간의 운세를 봐줄 수도 있고,",
+                fill="#41C1C3",
+                font=("Arial", 32 * -1)
+            )
 
-마음을 가다듬고,  맨 위에서 몇번째 카드를 뽑을지 적어줘.
+            self.canvas.create_text(
+                327.9999999999999,
+                127.00000000000006,
+                anchor="nw",
+                text="'내가 연애를 할 수 있을까' 처럼 특정 고민을 적어줘도 좋아.",
+                fill="#41C1C3",
+                font=("Arial", 32 * -1)
+            )
 
-""",
-        delay_num,
-    )
+            self.entry_image_1 = ImageTk.PhotoImage(
+                Image.open("assets\\concernEntry.png")
+            )
+            self.concernEntryImage = self.canvas.create_image(
+                719.9999999999999,
+                481.00000000000006,
+                image=self.entry_image_1
+            )
+            self.concernEntry=Text(self.canvas, bd=0,bg="#E7E7E7",fg="#000716",highlightthickness=0,font=("Arial", 40 * -1))
+            self.concernEntry.place(x=121.99999999999989,y=350.00000000000006,width=1196.0,height=264.0)
 
+            self.button_image_1 = ImageTk.PhotoImage(
+                Image.open("assets\\button_1.png")
+            )
 
-    # valid input을 위한 함수
-    def get_valid_input_exit(prompt, max_value):
-        while True:
-            try:
-                value = int(input_exit(prompt))
-                if 0 <= value <= max_value:
-                    return value
-                else:
-                    if lang == 1:
-                        print(
-                            f"\nPlease enter a number between 0 and {max_value}. Try again."
-                        )
-                    else:
-                        print(
-                            f"\n숫자는 0부터 {max_value} 사이로 입력해야 해요. 다시 시도해주세요."
-                        )
-            except ValueError:
-                if lang == 1:
-                    print("\nPlease enter a valid number.")
-                else:
-                    print("\n유효한 숫자를 입력해주세요.")
-
-
-    if lang == 1:
-        first_card = get_valid_input_exit(
-        "Write down the number of the card you want to draw (from 0 to 43): ", 43
-    )
-    else:
-        first_card = get_valid_input_exit("0부터 43까지의 수를 적으세요: ", 43)
-    first_card
-
-    if card_num == 3:
-        if lang == 1:
-            slow_type(
-            "\nI've drawn the first card. Now, let's draw the next card.", delay_num
-        )
-            second_card = get_valid_input_exit(
-            "Write down the number of the card you want to draw (from 0 to 42): ", 42
-        )
+            self.concernConfirmButton=Button(
+                self.canvas,
+                image=self.button_image_1,
+                borderwidth=0,
+                highlightthickness=0,
+                relief="flat",
+                command=self.proceed2
+            )
+            self.concernConfirmButton.place(
+                x=500.9999999999999,
+                y=682.0,
+                width=437.0,
+                height=110.41636657714844
+            )
+            self.canvas.create_rectangle(
+                0,
+                209.00000000000006,
+                1504.0,
+                218.00000000000006,
+                fill="#41C1C3",
+                outline=""
+            )
+            
         else:
-            slow_type("\n첫번째 카드를 뽑았어,  그럼 다음 카드를 뽑아볼까?", delay_num)
-            second_card = get_valid_input_exit("0부터 42까지의 수를 적으세요: ", 42)
-        second_card
+            messagebox.showerror('mbti가 뭐야?','mbti란을 비워둘 순 없어!')
 
-        if lang == 1:
-            slow_type(
-            "\nI've drawn the second card. Now, let's draw the last card.", delay_num
+    def proceed2(self):
+        self.concern=self.concernEntry.get(1.0, 'end').replace('\n',' ')
+        self.canvas.destroy()
+        self.canvas=Canvas(
+            self.root,
+            bg = "#FFFFFF",
+            height = 900,
+            width = 1440,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
         )
-            third_card = get_valid_input_exit(
-            "Write down the number of the card you want to draw (from 0 to 41): ", 41
+        self.canvas.place(x=0,y=0)
+        self.showPrompot()
+
+
+    def showPrompot(self):
+        self.canvas.destroy()
+        self.canvas=Canvas(
+            self.root,
+            bg = "#FFFFFF",
+            height = 900,
+            width = 1440,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
         )
+        self.canvas.place(x=0,y=0)
+        reader.set_concern(self.concern)
+        reader.set_mbti(self.mbti)
+        reader.set_cards_num()
+        self.card_num = reader.cards_num
+        self.canvas.create_text(
+                500,
+                280,
+                anchor="nw",
+                text="좋아, 그럼 이제 카드를 뽑아볼까?",
+                fill="#41C1C3",
+                font=("Arial", 32 * -1)
+            )
+
+        self.button_image_1 = ImageTk.PhotoImage(
+            Image.open("assets\\button_1.png")
+        )
+        self.yesButton=Button(
+            self.canvas,
+            image=self.button_image_1,
+            borderwidth=0,
+            highlightthickness=0,
+            relief="flat",
+            command=self.goToClassicTarotCardPullApp
+        )
+        self.yesButton.place(
+            x=500.9999999999999,
+            y=682.0,
+            width=437.0,
+            height=110.41636657714844
+        )
+
+    def goToClassicTarotCardPullApp(self):
+        self.canvas.destroy()
+        tarotApp=ClassicTarotCardPullApp(self.root, self.card_num, self.concern)
+
+class ClassicTarotCardPullApp():
+    def __init__(self, root, card_num, concern):
+        self.root=root
+        self.card_num=card_num
+        self.concern=concern
+
+        self.mainFrame=Frame(self.root,width=1440,height=900)
+        self.mainFrame.grid(column=0,row=0)
+
+        self.canvas=Canvas(
+            self.root,
+            bg = "#FFFFFF",
+            height = 900,
+            width = 1440,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
+        )
+
+        self.canvas.place(x = 0, y = 0)
+
+        self.canvas.create_text(
+            565.9999999999999,
+            0,
+            anchor="nw",
+            text="타로점 보기",
+            fill="#001C54",
+            font=("Arial Black", 64 * -1)
+        )
+
+        self.canvas.create_text(
+            479.9999999999999,
+            80.00000000000006,
+            anchor="nw",
+            text=f"지금부터 총 {card_num}개의 카드를 뽑을거야.",
+            fill="#41C1C3",
+            font=("Arial", 32 * -1)
+        )
+
+        self.canvas.create_text(
+            419.9999999999999,
+            129.00000000000006,
+            anchor="nw",
+            text="마음을 가다듬고, 너가 뽑고 싶은 카드를 뽑아줘.",
+            fill="#41C1C3",
+            font=("Arial", 32 * -1)
+        )
+
+        self.card_frame=[]
+        self.image_path=[]
+        self.image=[]
+        self.label=[]
+        self.originSize=(int(1144*0.13),int(1919*0.13))
+        self.bigSize=(int(1144*0.16),int(1919*0.16))
+        for i in range(0,21):
+            self.display_card(0,i,40*i,0.5)
+        for i in range(0,21):
+            self.display_card(0,i+21,40*i,0.2)
+        self.selected_card=[]
+
+
+        self.button_image_1 = ImageTk.PhotoImage(
+            Image.open("assets\\frame0\\button_2.png")
+        )
+
+        self.startButton=Button(
+            self.canvas,
+            image=self.button_image_1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.next,
+            relief="flat"
+        )
+        self.startButton.place(
+            x=566.9999999999999,
+            y=760.0,
+            width=305.0,
+            height=77.06405639648438
+        )
+    
+    def display_card(self, card_index, index, x, y):
+        self.card_frame.append(0)
+        self.image_path.append(0)
+        self.image.append(0)
+        self.label.append(0)
+        self.card_frame[index] = Frame(self.canvas, width=self.originSize[0], height=self.originSize[1],)
+        self.card_frame[index].place(relx=x/(22*40), rely=y)
+        
+        self.image_path[index] = cards[card_index]['card']
+        self.image[index] = ImageTk.PhotoImage(Image.open(self.image_path[index]).resize(self.originSize))
+        
+        self.label[index] = Label(self.card_frame[index], image=self.image[index], padx=10,pady=10)
+        self.label[index].image = self.image[index]  # Keep a reference to the image to prevent garbage collection
+        self.label[index].place(x=0, y=0)
+
+        self.label[index].bind("<Enter>", (lambda event:self.on_enter(event, index)))
+        self.label[index].bind("<Leave>", (lambda event:self.on_leave(event, index)))
+        self.label[index].bind("<Button-1>", (lambda event:self.on_click(event, index)))
+        
+        
+        return self.card_frame[index], self.label[index]
+    
+    def on_enter(self, event, index):
+        self.card_frame[index].config(width=self.bigSize[0],height=self.bigSize[1])
+        self.image[index]=ImageTk.PhotoImage(Image.open(self.image_path[index]).resize(self.bigSize))
+        self.label[index].config(width=self.bigSize[0],height=self.bigSize[1],image=self.image[index])
+    def on_leave(self, event, index):
+        self.card_frame[index].config(width=self.originSize[0],height=self.originSize[1])
+        self.image[index]=ImageTk.PhotoImage(Image.open(self.image_path[index]).resize(self.originSize))
+        self.label[index].config(width=self.originSize[0],height=self.originSize[1],image=self.image[index])
+    def on_click(self, event, index):
+        if index in self.selected_card:
+            self.selected_card.remove(index)
+            self.card_frame[index].config(highlightthickness=0, highlightbackground='black')
+        elif len(self.selected_card)<self.card_num:
+            self.selected_card.append(index)
+            self.card_frame[index].config(highlightthickness=4, highlightbackground='yellow')
         else:
-            slow_type("\n이제 마지막으로 세번째 카드를 뽑아보자.", delay_num)
-            third_card = get_valid_input_exit("0부터 41까지의 수를 적으세요: ", 41)
+            messagebox.showerror('카드 개수가 너무 많아요!',f'{self.card_num+1}개는 고를 수 없어!')
+    def next(self):
+        if len(self.selected_card)!=self.card_num:
+            messagebox.showerror('아직 카드를 다 고르지 않았어!',f'{self.card_num}개의 카드를 골라줘!')
+        else:
+            self.canvas.destroy()
+            interpretation_app=ClassicInterpretationApp(self.root, self.selected_card, self.concern)
+            
+class ClassicInterpretationApp():
+    def __init__(self, root, selected_card, concern):
+        self.root=root
+        self.selected_card=selected_card
+        self.concern=concern
 
-    ## Card Loading (string)
-    clear_screen()
-    print("================================================================")
-    if lang == 1:
-        slow_type(
-        """
-Great! Now, let's look at the cards one by one and get a glimpse of the future!
-Are you ready?
-""",
-        delay_num,
-    )
-    else:
-        slow_type(
-        """
-잘했어!
-이제 카드를 하나씩 살펴보면서 미래를 살짝 엿보도록 하자!
-준비됐어?
-""",
-        delay_num,
-    )
+        self.mainFrame=Frame(self.root)
+        self.mainFrame.grid(column=0,row=0)
 
-    if lang == 1:
-        next2 = input_exit("Press Enter to continue.  \n")
-    else:
-        next2 = input_exit("계속하려면 Enter를 누르세요  \n")
+        self.titleLabel=Label(self.mainFrame,text='타로점 보기',font=("Arial Black", 64 * -1))
+        self.titleLabel.grid(column=0,row=0)
 
-    first_tarot_card = list_tarot_deck_mixed[int(first_card)]
-    if card_num == 3:
-        list_wo_first = (
-            list_tarot_deck_mixed[:first_card] + list_tarot_deck_mixed[first_card + 1 :]
-        )
-        second_tarot_card = list_wo_first[int(second_card)]
-        list_wo_second = list_wo_first[:second_card] + list_wo_first[second_card + 1 :]
-        third_tarot_card = list_wo_second[int(third_card)]
-        reader.set_cards([first_tarot_card, second_tarot_card, third_tarot_card])
-    else:
-        reader.set_cards([first_tarot_card])
+        self.animation = '|/-\\'
+        self.animationLabel=Label(self.mainFrame, text='')
+        self.animationLabel.grid(column=0, row=1)
 
-    ## Interpretation
+        self.updateAnimation()
+        self.root.after(3000,self.showPromptFirst)
 
-    # AI의 Tarot Interpretation -----------------------------------
-    reader.set_meaning_by_idx(0)
-    reader.set_interpretation_by_idx(0)
-    interpretations = reader.cards
 
-    interpretation_word_first = interpretations[0]["meaning"]
-    interpretation_concern_first = interpretations[0]["interpretation"]
-    # -------------------------------------------------------------
+    def updateAnimation(self):
+        self.animationLabel.config(text='응답 생성중...'+self.animation[int(time.time()*10)%len(self.animation)])
+        self.root.after(100,self.updateAnimation)
 
-    clear_screen()
-    first_tarot_card_ascii = ""
-    for n in range(len(list_tarot_deck_mixed)):
-        if first_tarot_card[0] == cards[n]["name"]:
-            first_tarot_card_ascii = cards[n]["card"]
+    def showPromptFirst(self):
+        self.animationLabel.destroy()
+        self.list_tarot_deck_mixed=list_up_tarot + list_rev_tarot
+        random.shuffle(self.list_tarot_deck_mixed)   
+        self.first=self.list_tarot_deck_mixed[self.selected_card[0]]
+        if len(self.selected_card)==3:
+            self.second=self.list_tarot_deck_mixed[self.selected_card[1]]
+            self.third=self.list_tarot_deck_mixed[self.selected_card[2]]
+        if len(self.selected_card)==3:
+            reader.set_cards([self.first,self.second,self.third])
+        else:
+            reader.set_cards([self.first])
 
-    print(first_tarot_card_ascii + "\n")
+        print(self.selected_card)
+        reader.set_meaning_by_idx(0)
+        reader.set_interpretation_by_idx(0)
+        interpretations = reader.cards
+        interpretation_word_first = interpretations[0]["meaning"]
+        self.interpretation_concern_first = interpretations[0]["interpretation"]
+        self.fName=self.first[1]
 
-    if lang == 1:
-        slow_type(
-        f"""
-The first card you drew is {first_tarot_card[0]}.
+        self.fLabel=Label(self.mainFrame,text=self.fName+'\n'+interpretation_word_first+'\n'+self.interpretation_concern_first, wraplength=800,font=('',18))
+        self.fLabel.grid(column=1,row=1)
 
-{interpretation_word_first}
+        
+        self.originSize=(114*2,191*2)
+        for n in range(len(self.list_tarot_deck_mixed)+1):
+            if self.first[0]==cards[n]['name']:
+                self.fImagePath=cards[n]['card']
+                self.fImage=ImageTk.PhotoImage(Image.open(self.fImagePath).resize(self.originSize))
+        self.fImageLabel=Label(self.mainFrame,image=self.fImage)
+        self.fImageLabel.grid(column=0,row=1)
+        
+        if len(self.selected_card)==3:
+            self.nextSButton=Button(self.mainFrame,text='다음 카드',command=self.showPromptSecond)
+            self.nextSButton.grid(column=0,row=2)
+        else:
+            self.overallButton=Button(self.mainFrame,text='종합',command=self.showOverall)
+            self.overallButton.grid(column=0,row=2)
 
-{interpretation_concern_first}
-
-""",
-        delay_num,
-    )
-    else:
-        slow_type(
-        f"""
-너가 처음으로 뽑은 카드는 {first_tarot_card[1]} (이)야. 
-
-{interpretation_word_first}
-
-{interpretation_concern_first}
-
-""",
-        delay_num,
-    )
-
-    if lang == 1:
-        next3 = input_exit("Press Enter to continue.  \n")
-    else:
-        next3 = input_exit("계속하려면 Enter 키를 눌러주세요  \n")
-
-    if card_num == 3:
-        for n in range(len(list_tarot_deck_mixed)):
-            if second_tarot_card[0] == cards[n]["name"]:
-                second_tarot_card_ascii = cards[n]["card"]
-
-        for n in range(len(list_tarot_deck_mixed)):
-            if third_tarot_card[0] == cards[n]["name"]:
-                third_tarot_card_ascii = cards[n]["card"]
-
+    def showPromptSecond(self):
+        self.fLabel.destroy()
+        self.fImageLabel.destroy()
+        self.nextSButton.destroy()
         reader.set_meaning_by_idx(1)
         reader.set_interpretation_by_idx(1)
         interpretations = reader.cards
         interpretation_word_second = interpretations[1]["meaning"]
-        interpretation_concern_second = interpretations[1]["interpretation"]
+        self.interpretation_concern_second = interpretations[1]["interpretation"]
+        
+        self.sName=self.second[1]
+        self.sLabel=Label(self.mainFrame,text=self.sName+'\n'+interpretation_word_second+'\n'+self.interpretation_concern_second, wraplength=800,font=('',18))
+        self.sLabel.grid(column=1,row=1)
 
-        clear_screen()
-        print(second_tarot_card_ascii + "\n")
-        if lang == 1:
-            slow_type(
-            f"""
-The second card you drew is {second_tarot_card[0]}.
 
-{interpretation_word_second}
+        for n in range(len(self.list_tarot_deck_mixed)+1):
+            if self.second[0]==cards[n]['name']:
+                self.sImagePath=cards[n]['card']
+                self.sImage=ImageTk.PhotoImage(Image.open(self.sImagePath).resize(self.originSize))
 
-{interpretation_concern_second}
+        self.sImageLabel=Label(self.mainFrame,image=self.sImage)
+        self.sImageLabel.grid(column=0,row=1)
 
-""",
-            delay_num,
-        )
-        else:
-            slow_type(
-            f"""
-너가 두번째로 뽑은 카드는 {second_tarot_card[1]} (이)야.
+        self.nextTButton=Button(self.mainFrame,text='다음 카드',command=self.showPromptThird)
+        self.nextTButton.grid(column=0,row=2)
 
-{interpretation_word_second}
-
-{interpretation_concern_second}
-
-""",
-            delay_num,
-        )
-        if lang == 1:
-            next3 = input_exit("Press Enter to continue.  \n")
-        else:
-            next3 = input_exit("계속하려면 Enter 키를 눌러주세요  \n")
+    def showPromptThird(self):
+        self.sLabel.destroy()
+        self.sImageLabel.destroy()
+        self.nextTButton.destroy()
 
         reader.set_meaning_by_idx(2)
         reader.set_interpretation_by_idx(2)
         interpretations = reader.cards
         interpretation_word_third = interpretations[2]["meaning"]
-        interpretation_concern_third = interpretations[2]["interpretation"]
-        interpretations = reader.cards
-        clear_screen()
-        print(third_tarot_card_ascii + "\n")
-        if lang == 1:
-            slow_type(
-            f"""
-The third card you drew is {third_tarot_card[0]}.
+        self.interpretation_concern_third = interpretations[2]["interpretation"]
+        
+        self.tName=self.third[1]
+        self.tLabel=Label(self.mainFrame,text=self.tName+'\n'+interpretation_word_third+'\n'+self.interpretation_concern_third, wraplength=800,font=('',18))
+        self.tLabel.grid(column=1,row=1)
 
-{interpretation_word_third}
+        for n in range(len(self.list_tarot_deck_mixed)+1):
+            if self.third[0]==cards[n]['name']:
+                self.tImagePath=cards[n]['card']
+                self.tImage=ImageTk.PhotoImage(Image.open(self.tImagePath).resize(self.originSize))
+        self.tImageLabel=Label(self.mainFrame,image=self.tImage)
+        self.tImageLabel.grid(column=0,row=1)
 
-{interpretation_concern_third}
+        self.overallButton=Button(self.mainFrame,text='종합',command=self.showOverall)
+        self.overallButton.grid(column=0,row=2)
+        
 
-""",
-            delay_num,
-        )
+    def showOverall(self):
+        if len(self.selected_card)==3:
+            self.tLabel.destroy()
+            self.tImageLabel.destroy()
         else:
-            slow_type(
-            f"""
-너가 세번째로 뽑은 카드는 {third_tarot_card[1]} (이)야.
+            self.fLabel.destroy()
+            self.fImageLabel.destroy()
+        self.overallButton.destroy()
+        reader.set_interpretation_overall()
+        self.interpretation_overall = reader.interpretation_overall
 
-{interpretation_word_third}
+        self.oLabel=Label(self.mainFrame,text=self.interpretation_overall, wraplength=800,font=('',18))
+        self.oLabel.grid(column=2,row=1)
 
-{interpretation_concern_third}
-
-""",
-            delay_num,
-        )
-        if lang == 1:
-            next3 = input_exit("Press Enter to continue.  \n")
-        else:
-            next3 = input_exit("계속하려면 Enter 키를 눌러주세요  \n")
-
-# ---- debugging ----------------------
-
-
-    reader.set_interpretation_overall()
-    interpretation_overall = reader.interpretation_overall
-    clear_screen()
-    print("================================================================")
-    if lang == 1:
-        slow_type(
-        f"""
-To summarize the results,
-
-{interpretation_overall}
-
-""",
-        delay_num,
-    )
-    else:
-        slow_type(
-        f"""
-결과를 요약해보면,
-
-{interpretation_overall}
-
-""",
-        delay_num,
-    )
-    if lang == 1:
-        next3 = input_exit("Press Enter to continue.  \n")
-    else:
-        next3 = input_exit("계속하려면 Enter 키를 눌러주세요  \n")
-
-    ## Rating (strings)
-    clear_screen()
-    print("================================================================")
-
-    if lang == 1:
-        slow_type(
-        f"""
-
-This is all I've seen of your future.
-How was it? I hope you liked the results.
-    
-    """,
-        delay_num,
-    )
-    else:
-        slow_type(
-        f"""
-
-여기까지가 내가 본 미래의 전부야.  
-어땠어?  결과가 마음에 들었으면 좋겠네.  
-
-""",
-        delay_num,
-    )
-
-    # pdf generation
-    pdf = PDF(f"{name}")
-    pdf.add_page()
-    pdf.add_concern(concern)
-    pdf.add_block(
-        first_tarot_card_ascii,
-        first_tarot_card[0],
-        interpretation_concern_first,
-    )
-    if card_num == 3:
+        self.endButton=Button(self.mainFrame,text='끝내기',command=self.end)
+        self.endButton.grid(column=0,row=1)
+        self.deepButton=Button(self.mainFrame,text='추가 질문',command=self.deep)
+        self.deepButton.grid(column=1,row=1)
+        
+    def end(self):
+        self.mainFrame.destroy()
+        global pdf
+        pdf = PDF(f"{name}")
+        pdf.add_page()
+        pdf.add_concern(self.concern)
         pdf.add_block(
-            second_tarot_card_ascii,
-            second_tarot_card[0],
-            interpretation_concern_second,
+            self.fImagePath,
+            self.first[0],
+            self.interpretation_concern_first,
         )
-        pdf.add_block(
-            third_tarot_card_ascii,
-            third_tarot_card[0],
-            interpretation_concern_third,
-        )
-    pdf.add_result(interpretation_overall)
-    pdf.output(f"{name}_TarotAI_Result.pdf")
+        if len(self.selected_card) == 3:
+            pdf.add_block(
+                self.sImagePath,
+                self.second[0],
+                self.interpretation_concern_second,
+            )
+            pdf.add_block(
+                self.tImagePath,
+                self.third[0],
+                self.interpretation_concern_third,
+            )
+        pdf.add_result(self.interpretation_overall)
+        # pdf.output(f"{name}_TarotAI_Result.pdf")
+        # send_message.message_data(name, Google_Drive_Api.main(f'{name}_TarotAI_Result.pdf'), self.interpretation_overall)   
+        classicEndApp=ClassicEndApp(self.root)
+    def deep(self):
+        self.oLabel.destroy()
+        self.endButton.destroy()
+        self.deepButton.destroy()
+        
+        self.deepString='추가적인 질문이 있다면 어떤 질문인지 얘기해줄래?'
+        self.deepLabel=Label(self.mainFrame,text=self.deepString)
+        self.deepLabel.grid(column=0,row=1)
+        self.deepText=Text(self.mainFrame)
+        self.deepText.grid(column=0,row=2)
+        self.deepConfirmButton=Button(self.mainFrame,text='이게 궁금해',command=self.additionalAnswer)
+        self.deepConfirmButton.grid(column=0,row=3)
+    def additionalAnswer(self):
+        reader.set_interpretation_overall_add(self.deepText.get(1.0,'end'), self.interpretation_overall)
+        interpretation_overall_add=reader.interpretation_overall_add
+        self.deepLabel.destroy()
+        self.deepText.destroy()
+        self.deepConfirmButton.destroy()
+        self.deepFinal=Label(self.mainFrame,text=interpretation_overall_add, wraplength=500)
+        self.deepFinal.grid(column=0,row=1)
+        self.endButton=Button(self.mainFrame,text='끝내기', command=self.end)
+        self.endButton.grid(column=0,row=2)
 
-    print()
-    ## Ending
-    if lang == 1:
-        slow_type(
-        f"""
-It's time to say goodbye.
+class ClassicEndApp():
+    def __init__(self,root):
+        self.root=root
+        self.mainFrame=Frame(self.root)
+        self.mainFrame.grid(column=0,row=0)
 
-Oh, can I have your email address before you go?
+        self.titleLabel=Label(self.mainFrame,text='타로점 보기',font=big_font)
+        self.titleLabel.grid(column=0,row=0)
 
-I'll summarize the results of today's reading into a pdf file and send it to you by email!
-    
-    """,
-        delay_num,
-    )
-    else:
-        slow_type(
-        f"""
-이제 헤어질  시간이야.
+        self.descString='여기까지가 내가 본 미래의 전부야.\n'
+        self.descString+='어땠어? 결과가 마음에 들었으면 좋겠네.\n'
+        self.descString+='이제 헤어질 시간이야.\n'
+        self.descString+='오늘 본 점의 결과는 pdf 파일로 정리해서 카카오톡으로 보내줄게!\n'
+        self.descLabel=Label(self.mainFrame,text=self.descString,font=('',18))
+        self.descLabel.grid(column=0,row=1)
 
-아 참, 가기 전에 이메일 주소 알려줄 수 있을까? 
+        descString=f'안녕, {name}!\n'
+        descString+='오늘 타로 보러 와줘서 다시 한 번 고마워!!\n'
+        descString+='타로 결과를 다시 보고 싶을 땐 카카오톡을 확인해봐.\n'
+        descString+='그럼, 안녕!\n'
+        descString+='TarotAI 올림.'
+        self.descLabel=Label(self.mainFrame,text=descString,font=('',18))
+        self.descLabel.grid(column=0,row=2)
+        self.descLabel=Label(self.mainFrame,text=descString,font=('',18))
+        self.descLabel.grid(column=0,row=2)
+        
 
-오늘 본 점의 결과를 pdf 파일로 정리해서 이메일로 보내줄게!
+        self.endConfirmButton=Button(self.mainFrame,command=self.end,text='끝내기')
+        self.endConfirmButton.grid(column=0,row=3)
+    def end(self):
+        self.mainFrame.destroy()
+        beforeStartApp=BeforeStartApp(self.root)
+        
 
-""",
-        delay_num,
-    )
-
-    while True:
-        try:
-            if lang == 1:
-                email = input_exit("Write down your email address:  ")
-                email_confirm = input_exit(f"Is {email} your email address?  (Y/N): ")
-            else:
-                email = input_exit("이메일 주소를 적어주세요:  ")
-                email_confirm = input_exit(f"{email}    이게 너의 이메일 주소가 맞아?  (Y/N): ")
-
-            if email_confirm == "Y" or email_confirm == "y":
-                break
-        except:
-            pass
-
-    # ------------------------------- email 보내기
-    receiver_email = email
-    result_pdf = f"{name}_TarotAI_Result.pdf"
-    if lang == 1:
-        subject = f"TarotAI Result for {name}"
-        body = f"""
-    Hey,  {name}!
-
-    Hello!  Thanks for coming to see the tarot today!
-    I've made the tarot results into a pdf, so check the attached file.
-    Well then,  goodbye!
-
-    TarotAI
-    """
-    else:
-        subject = "정바융 Merge TarotAI 결과"
-        body = f"""
-    {name}에게,
-
-    안녕,  {name}! 
-    오늘 타로 보러 와줘서 다시 한 번 고마워!
-    타로 결과를 pdf로 만들어봤으니,  첨부파일을 확인해봐.
-    그럼,  안녕!
-
-    TarotAI 올림.
-    """
-    if lang == 1:
-        print("Sending an email...  \n")
-    else:
-        print("이메일 보내는 중...  \n")
-
-    while True:
-        try:
-            email_sender.send_email(receiver_email, subject, body, result_pdf)
-            break
-        except:
-            if lang == 1:  
-                receiver_email = input("Email address is wrong. Please rewrite your email: ")
-            else:
-                receiver_email = input("이메일 주소가 잘못되었어. 다시 입력해 줄래?: ")
-
-
-
-    #  -------------------------------------------
-
-    clear_screen()
-    print("===============================================================")
-    if lang == 1:
-        slow_type(
-        f"""
-{receiver_email}
-I sent an email to this address!  Be sure to check it later!
-
-I'm still learning about tarot, so I won't receive any money from you.
-Don't forget to get a stamp at the booth before you go!
-
-Thanks for coming.  Let's see each other again next time.  Goodbye!
-
-""",
-        delay_num,
-    )
-    else:
-        slow_type(
-        f"""
-{receiver_email}
-이 주소로 이메일을 보냈어!  나중에 꼭 확인해봐!
-
-아직 나도 타로에 대해 배우는 중이라 복채는 받지 않을게.
-가기 전에 부스 도장 받는 거 잊지 말고!
-
-와줘서 고마워.  다음 기회가 되면 또 보자.  안녕!
-
-""",
-        delay_num,
-    )
-
-    if lang == 1:
-        next5 = input_exit("Press Enter to end.  Thank you.")
-    else:
-        next5 = input_exit("끝내려면 Enter 키를 눌러주세요.  감사합니다.")
-    clear_screen()
-    time.sleep(5)
+        
+window=Tk()
+window.geometry("1440x900")
+app=BeforeStartApp(window)
+window.mainloop()
